@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Transliteration</title>
+    <script>
+        async function transliterate(fieldId, outputId) {
+            const text = document.getElementById(fieldId).value;
+
+            if(text.trim() === "") {
+                document.getElementById(outputId).value = "";
+                return;
+            }
+
+            const response = await fetch("/transliterate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text, method: "aws" })
+            });
+            const data = await response.json();
+            document.getElementById(outputId).value = data.translated;
+        }
+    </script>
+</head>
+<body>
+    <h2>Enter User Data</h2>
+
+    <form method="post" action="/submit">
+        <label>Name (English):</label><br>
+        <input type="text" id="name_en" name="name" onblur="transliterate('name_en','name_kn')" required>
+        <input type="text" id="name_kn" readonly placeholder="Kannada transliteration"><br><br>
+
+        <label>Address (English):</label><br>
+        <textarea id="address_en" name="address" onblur="transliterate('address_en','address_kn')" required></textarea>
+        <textarea id="address_kn" readonly placeholder="Kannada transliteration"></textarea><br><br>
+
+        <input type="hidden" id="hidden_name_kn" name="name_kn">
+        <input type="hidden" id="hidden_address_kn" name="address_kn">
+
+        <button type="submit" onclick="
+            document.getElementById('hidden_name_kn').value=document.getElementById('name_kn').value;
+            document.getElementById('hidden_address_kn').value=document.getElementById('address_kn').value;
+        ">Submit</button>
+    </form>
+</body>
+</html>
